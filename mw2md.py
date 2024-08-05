@@ -45,6 +45,7 @@ class MarkdownConverter:
         lines = apply_lines(self._convert_emphasis, lines)()
         lines = apply_lines(self._convert_links, lines)()
         lines = apply_lines(self._convert_codeblocks, lines)()
+        lines = apply_lines(self._convert_codeblocks_ext, lines)()
         lines = apply_lines(self._convert_lists, lines)()
 
         if self.dest:
@@ -127,6 +128,18 @@ class MarkdownConverter:
         line = line.replace("</source>", "```")
         return line
 
+    def _convert_codeblocks_ext(self, line):
+        '''convert source blocks (<syntaxhighlight lang="sh">) to ```
+        '''
+        code = "```"
+        if line.startswith("<syntaxhighlight"):
+             lang = (line.replace("<syntaxhighlight lang=", "").replace(
+                     ">", "").replace("'","").replace('"','').strip())
+             if lang:
+                 code = "%s%s\n" %(code, lang)
+             line = code
+        line = line.replace("</syntaxhighlight>", "```")
+        return line
 
     def _convert_emphasis(self, line):
         '''convert in text code (e.g. ''only'') to markdown for bold
